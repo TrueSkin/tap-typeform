@@ -167,7 +167,12 @@ class AnswersStream(TypeformStream):
         }
         if next_page_token:
             params["page"] = next_page_token
+#        if self.replication_key:
+#            params["sort"] = f"{self.replication_key},asc"
+#            params["since"] = self.get_starting_replication_key_value(context)[0:19]
         if self.replication_key:
             params["sort"] = f"{self.replication_key},asc"
-            params["since"] = self.get_starting_replication_key_value(context)[0:19]
+            starting_value = self.get_starting_replication_key_value(context)
+            if starting_value:
+                params["since"] = starting_value[0:19]
         return params
