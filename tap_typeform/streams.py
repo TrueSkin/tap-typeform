@@ -9,6 +9,7 @@ from singer_sdk import typing as th  # JSON Schema typing helpers
 
 from tap_typeform.client import TypeformStream
 
+
 class FormsStream(TypeformStream):
     """Define custom stream."""
     name = "forms"
@@ -62,6 +63,7 @@ class FormsStream(TypeformStream):
             "form_id": record["id"],
         }
 
+
 class QuestionsStream(TypeformStream):
     """Define custom stream."""
     name = "questions"
@@ -88,6 +90,7 @@ class QuestionsStream(TypeformStream):
                 "title": question.get("title"),
                 "type": question.get("type")
             }
+
 
 class AnswersStream(TypeformStream):
     """Define custom stream."""
@@ -182,7 +185,7 @@ class AnswersStream(TypeformStream):
             "page_size": 1000
         }
         if next_page_token:
-            params["before"] = next_page_token
+            params["after"] = next_page_token  # Use 'after' for ascending sort order
         if self.replication_key:
             params["sort"] = f"{self.replication_key},asc"
             starting_value = self.get_starting_replication_key_value(context)
