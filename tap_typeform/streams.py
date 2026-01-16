@@ -30,7 +30,7 @@ class FormsStream(TypeformStream):
 
         if forms_ids := self.config.get("forms_ids_list"):
             forms_ids = forms_ids.split(',')
-            forms = [form for form in forms if form['id'] in forms_ids ]
+            forms = [form for form in forms if form['id'] in forms_ids]
 
         for form in forms:
             yield {
@@ -157,6 +157,22 @@ class AnswersStream(TypeformStream):
 
         return None
 
+    def get_next_page_token(
+        self, response: requests.Response, previous_token: Optional[Any]
+    ) -> Optional[Any]:
+        """Return a token for identifying next page or None if no more pages."""
+        data = response.json()
+        items = data.get("items", [])
+
+        # If we got fewer items than page_size, we've reached the end
+        if len(items) < 1000:
+            return None
+
+        # Use the last item's token as the 'before' cursor for next page
+        if items:
+            return items[-1].get("token")
+
+        return None
 
     def get_url_params(
         self, context: Optional[dict], next_page_token: Optional[Any]
@@ -166,10 +182,7 @@ class AnswersStream(TypeformStream):
             "page_size": 1000
         }
         if next_page_token:
-            params["page"] = next_page_token
-#        if self.replication_key:
-#            params["sort"] = f"{self.replication_key},asc"
-#            params["since"] = self.get_starting_replication_key_value(context)[0:19]
+            params["before"] = next_page_token
         if self.replication_key:
             params["sort"] = f"{self.replication_key},asc"
             starting_value = self.get_starting_replication_key_value(context)
