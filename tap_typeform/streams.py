@@ -185,9 +185,10 @@ class AnswersStream(TypeformStream):
             "page_size": 1000
         }
         if next_page_token:
-            params["after"] = next_page_token  # Use 'after' for ascending sort order
+            # Use 'before' for pagination (API defaults to submitted_at desc)
+            # Note: 'before'/'after' cannot be combined with 'sort' parameter
+            params["before"] = next_page_token
         if self.replication_key:
-            params["sort"] = f"{self.replication_key},asc"
             starting_value = self.get_starting_replication_key_value(context)
             if starting_value:
                 params["since"] = starting_value[0:19]
