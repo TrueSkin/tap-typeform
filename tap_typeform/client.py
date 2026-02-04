@@ -1,12 +1,8 @@
 """REST client handling, including TypeformStream base class."""
 
-import requests
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, List, Iterable
+from typing import Any, Dict, Optional
 
-from memoization import cached
-
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import RESTStream
 from singer_sdk.authenticators import BearerTokenAuthenticator
 
@@ -23,8 +19,7 @@ class TypeformStream(RESTStream):
     def authenticator(self) -> BearerTokenAuthenticator:
         """Return a new authenticator object."""
         return BearerTokenAuthenticator.create_for_stream(
-            self,
-            token=self.config.get("personal_access_token")
+            self, token=self.config.get("personal_access_token")
         )
 
     @property

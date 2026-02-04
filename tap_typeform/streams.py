@@ -1,10 +1,9 @@
 """Stream type classes for tap-typeform."""
-import json
-import requests
-from pathlib import Path
-from typing import Any, Dict, Optional, Union, List, Iterable
 
-from singer_sdk.helpers.jsonpath import extract_jsonpath
+import json
+from typing import Any, Dict, Iterable, Optional
+
+import requests
 from singer_sdk import typing as th  # JSON Schema typing helpers
 
 from tap_typeform.client import TypeformStream
@@ -12,6 +11,7 @@ from tap_typeform.client import TypeformStream
 
 class FormsStream(TypeformStream):
     """Define custom stream."""
+
     name = "forms"
     path = "/forms"
     primary_keys = ["id"]
@@ -30,8 +30,8 @@ class FormsStream(TypeformStream):
         forms = data.get("items")
 
         if forms_ids := self.config.get("forms_ids_list"):
-            forms_ids = forms_ids.split(',')
-            forms = [form for form in forms if form['id'] in forms_ids]
+            forms_ids = forms_ids.split(",")
+            forms = [form for form in forms if form["id"] in forms_ids]
 
         for form in forms:
             yield {
@@ -66,6 +66,7 @@ class FormsStream(TypeformStream):
 
 class QuestionsStream(TypeformStream):
     """Define custom stream."""
+
     name = "questions"
     parent_stream_type = FormsStream
     path = "/forms/{form_id}"
@@ -88,12 +89,13 @@ class QuestionsStream(TypeformStream):
                 "form_id": data.get("id"),
                 "id": question.get("id"),
                 "title": question.get("title"),
-                "type": question.get("type")
+                "type": question.get("type"),
             }
 
 
 class AnswersStream(TypeformStream):
     """Define custom stream."""
+
     name = "answers"
     parent_stream_type = FormsStream
     path = "/forms/{form_id}/responses"
@@ -131,29 +133,29 @@ class AnswersStream(TypeformStream):
 
                 if answers:
                     for answer in answers:
-                        data_type = answer.get('type')
+                        data_type = answer.get("type")
 
-                        if data_type in ['choice', 'choices', 'payment']:
+                        if data_type in ["choice", "choices", "payment"]:
                             answer_value = json.dumps(answer.get(data_type))
-                        elif data_type in ['number', 'boolean']:
+                        elif data_type in ["number", "boolean"]:
                             answer_value = str(answer.get(data_type))
                         else:
                             answer_value = answer.get(data_type)
-                        user_id = item.get('hidden', {}).get('user_id')
-                        nps_score_id = item.get('hidden', {}).get('nps_score_id')
+                        user_id = item.get("hidden", {}).get("user_id")
+                        nps_score_id = item.get("hidden", {}).get("nps_score_id")
 
                         yield {
-                            "question_id": answer.get('field').get('id'),
+                            "question_id": answer.get("field").get("id"),
                             "data_type": data_type,
                             "answer": answer_value,
-                            "response_id": item['response_id'],
-                            "submitted_at": item['submitted_at'],
-                            "landed_at": item['landed_at'],
-                            "browser": item['metadata']['browser'],
-                            "network_id": item['metadata']['network_id'],
-                            "referer": item['metadata']['referer'],
-                            "user_agent": item['metadata']['user_agent'],
-                            "token": item['token'],
+                            "response_id": item["response_id"],
+                            "submitted_at": item["submitted_at"],
+                            "landed_at": item["landed_at"],
+                            "browser": item["metadata"]["browser"],
+                            "network_id": item["metadata"]["network_id"],
+                            "referer": item["metadata"]["referer"],
+                            "user_agent": item["metadata"]["user_agent"],
+                            "token": item["token"],
                             "user_id": user_id,
                             "nps_score_id": nps_score_id,
                         }
@@ -181,9 +183,7 @@ class AnswersStream(TypeformStream):
         self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
-        params: dict = {
-            "page_size": 1000
-        }
+        params: dict = {"page_size": 1000}
         if next_page_token:
             # Use 'before' for pagination (API defaults to submitted_at desc)
             # Note: 'before'/'after' cannot be combined with 'sort' parameter

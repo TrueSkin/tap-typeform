@@ -6,21 +6,17 @@ from singer_sdk import Tap, Stream
 from singer_sdk import typing as th  # JSON schema typing helpers
 
 from tap_typeform.streams import (
-    TypeformStream,
     FormsStream,
     QuestionsStream,
-    AnswersStream
+    AnswersStream,
 )
 
-STREAM_TYPES = [
-    FormsStream,
-    QuestionsStream,
-    AnswersStream
-]
+STREAM_TYPES = [FormsStream, QuestionsStream, AnswersStream]
 
 
 class TapTypeform(Tap):
     """Typeform tap class."""
+
     name = "tap-typeform"
 
     config_jsonschema = th.PropertiesList(
@@ -28,7 +24,7 @@ class TapTypeform(Tap):
             "personal_access_token",
             th.StringType,
             required=True,
-            description="Your personal access token for Typeform's API."
+            description="Your personal access token for Typeform's API.",
         ),
         th.Property(
             "forms_ids_list",
